@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  couchbase:
+    build: ./scripts/
+    container_name: couchbase
+    volumes:
+      - ~/couchbase/node1:/opt/couchbase/var
+    ports:
+      - 8091:8091
+      - 8092:8092
+      - 8093:8093
+      - 8094:8094
+      - 11210:11210
+    networks:
+     - my_network
+  authentication-server:
+    build: .
+    container_name: authentication-server
+    depends_on:
+      - couchbase
+    ports:
+      - 8081:8081
+    networks:
+      - my_network
+    environment:
+      COUCHBASE_HOST: couchbase
+networks:
+  my_network:
+    driver: bridge
+    name: my_network

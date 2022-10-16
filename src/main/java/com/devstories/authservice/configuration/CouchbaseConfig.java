@@ -8,17 +8,17 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
 
     @Override
     public String getConnectionString() {
-        return "couchbase://127.0.0.1";
+        return "couchbase";
     }
 
     @Override
     public String getUserName() {
-        return "laser";
+        return "cagillaser";
     }
 
     @Override
     public String getPassword() {
-        return "laser123";
+        return "cagillaser123";
     }
 
     @Override
