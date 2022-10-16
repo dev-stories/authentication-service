@@ -6,28 +6,26 @@ set -m
 sleep 15
 
 # Setup index and memory quota
-curl -v -X POST http://127.0.0.1:8091/pools/default -d memoryQuota=300 -d indexMemoryQuota=300
+curl -v -X POST http://"$COUCHBASE_HOST":"$COUCHBASE_PORT"/pools/default -d memoryQuota=300 -d indexMemoryQuota=300
 
 # Setup services
-curl -v http://127.0.0.1:8091/node/controller/setupServices -d services=kv%2Cn1ql%2Cindex
+curl -v http://"$COUCHBASE_HOST":"$COUCHBASE_PORT"/node/controller/setupServices -d services=kv%2Cn1ql%2Cindex
 
 # Setup credentials
-curl -v http://127.0.0.1:8091/settings/web -d port=8091 -d username=cagillaser -d password=cagillaser123
+curl -v http://"$COUCHBASE_HOST":"$COUCHBASE_PORT"/settings/web -d port=8091 -d username=$COUCHBASE_USER -d password=$COUCHBASE_PASSWORD
 
 # Setup Memory Optimized Indexes
-curl -i -u cagillaser:cagillaser123 -X POST http://127.0.0.1:8091/settings/indexes -d storageMode=memory_optimized
-
-#->
-#couchbase-cli bucket-create -c 127.0.0.1:8091 --username cagillaser \
-# --password cagillaser123 --bucket dev-stories --bucket-type couchbase \
-# --bucket-ramsize 1024
+curl -i -u $COUCHBASE_USER:$COUCHBASE_PASSWORD -X POST http://"$COUCHBASE_HOST":"$COUCHBASE_PORT"/settings/indexes -d storageMode=memory_optimized
 
 # Load travel-sample bucket
-curl -v -X POST http://127.0.0.1:8091/pools/default/buckets \
--u cagillaser:cagillaser123 \
--d name=dev-stories \
--d ramQuota=256 \
--d bucketType=couchbase
+curl -v -X POST http://"$COUCHBASE_HOST":"$COUCHBASE_PORT"/pools/default/buckets \
+  -u $COUCHBASE_USER:$COUCHBASE_PASSWORD \
+  -d name=dev-stories \
+  -d ramQuota=256 \
+  -d bucketType=couchbase
+
+curl -X POST -v -u $COUCHBASE_USER:$COUCHBASE_PASSWORD "http://"$COUCHBASE_HOST":"$COUCHBASE_PORT"/_p/query/query/service" -d \
+  'statement=CREATE PRIMARY INDEX IF NOT EXISTS ON `default`:`dev-stories`'
 
 echo "Type: $TYPE"
 
@@ -36,15 +34,15 @@ if [ "$TYPE" = "WORKER" ]; then
   sleep 15
 
   #IP=`hostname -s`
-  IP=`hostname -I | cut -d ' ' -f1`
+  IP=$(hostname -I | cut -d ' ' -f1)
   echo "IP: " $IP
 
   echo "Auto Rebalance: $AUTO_REBALANCE"
   if [ "$AUTO_REBALANCE" = "true" ]; then
-    couchbase-cli rebalance --cluster=$COUCHBASE_MASTER:8091 --user=cagillaser --password=cagillaser123 --server-add=$IP --server-add-username=cagillaser --server-add-password=cagillaser123
+    couchbase-cli rebalance --cluster=$COUCHBASE_MASTER:8091 --user=$COUCHBASE_USER --password=$COUCHBASE_PASSWORD --server-add=$IP --server-add-username=$COUCHBASE_USER --server-add-password=$COUCHBASE_PASSWORD
   else
-    couchbase-cli server-add --cluster=$COUCHBASE_MASTER:8091 --user=cagillaser --password=cagillaser123 --server-add=$IP --server-add-username=cagillaser --server-add-password=cagillaser123
-  fi;
-fi;
+    couchbase-cli server-add --cluster=$COUCHBASE_MASTER:8091 --user=$COUCHBASE_USER --password=$COUCHBASE_PASSWORD --server-add=$IP --server-add-username=$COUCHBASE_USER --server-add-password=$COUCHBASE_PASSWORD
+  fi
+fi
 
 fg 1

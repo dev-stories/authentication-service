@@ -13,6 +13,11 @@ services:
       - 11210:11210
     networks:
      - my_network
+    environment:
+      - COUCHBASE_HOST=${COUCHBASE_HOST}
+      - COUCHBASE_USER=${COUCHBASE_USER}
+      - COUCHBASE_PASSWORD=${COUCHBASE_PASSWORD}
+      - COUCHBASE_PORT=${COUCHBASE_PORT}
   authentication-server:
     build: .
     container_name: authentication-server
