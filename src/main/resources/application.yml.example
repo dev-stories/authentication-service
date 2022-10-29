@@ -1,0 +1,15 @@
+server:
+  port: 8081
+
+application:
+  uri: /api/v1
+
+jwt:
+  secret:
+  expirationMs:
+
+db:
+  connectionString: couchbase://localhost
+  username: cagillaser
+  password: cagillaser123
+  bucketName: dev-stories

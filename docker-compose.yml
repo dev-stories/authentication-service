@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  couchbase:
+    build: ./scripts/
+    container_name: couchbase
+    volumes:
+      - ~/couchbase/node1:/opt/couchbase/var
+    ports:
+      - "8091:8091"
+      - "8092:8092"
+      - "8093:8093"
+      - "8094:8094"
+      - "11210:11210"
+    networks:
+     - my_network
+    environment:
+      - COUCHBASE_HOST=${COUCHBASE_HOST}
+      - COUCHBASE_USER=${COUCHBASE_USER}
+      - COUCHBASE_PASSWORD=${COUCHBASE_PASSWORD}
+      - COUCHBASE_PORT=${COUCHBASE_PORT}
+      - COUCHBASE_BUCKET=${COUCHBASE_BUCKET}
+  authentication-server:
+    build: .
+    container_name: authentication-server
+    depends_on:
+      - couchbase
+    ports:
+      - "8081:8081"
+    networks:
+      - my_network
+    environment:
+      - COUCHBASE_URL=${COUCHBASE_CONNECTION_STRING}:${COUCHBASE_PORT}
+      - server.port=${SERVER_PORT}
+      - db.connectionString=${COUCHBASE_CONNECTION_STRING}
+      - db.username=${COUCHBASE_USER}
+      - db.password=${COUCHBASE_PASSWORD}
+      - db.bucketName=${COUCHBASE_BUCKET}
+      - application.uri=${APPLICATION_URI}
+      - jwt.secret=${JWT_SECRET}
+      - jwt.expirationMs=${JWT_EXPIRATION_MS}
+networks:
+  my_network:
+    driver: bridge
+    name: authentication_server_network

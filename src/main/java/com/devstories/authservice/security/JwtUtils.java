@@ -20,7 +20,7 @@ public class JwtUtils {
     @Value("${jwt.secret}")
     private String jwtSecret;
     @Value("${jwt.expirationMs}")
-    private Long jwtExpirationMs;
+    private String jwtExpirationMs;
 
     public String generateJwtToken(Authentication authentication) {
         MyUserDetails userPrincipal = (MyUserDetails) authentication.getPrincipal();
@@ -28,7 +28,7 @@ public class JwtUtils {
                 .setSubject(userPrincipal.getUsername())
                 .addClaims(Map.of("userId", userPrincipal.getId()))
                 .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .setExpiration(new Date((new Date()).getTime() + Long.valueOf(jwtExpirationMs)))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
